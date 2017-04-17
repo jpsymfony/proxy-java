@@ -6,12 +6,12 @@ import java.util.Iterator;
 /**
  * Une gestion de listes d'elements.
  *
+ * @param <E> the type parameter
  * @author NSY102
  * @version Fevrier 2008
  */
 public interface Liste<E> extends Iterable<E>
 {
-
     // les operations
 
     /**
@@ -41,7 +41,6 @@ public interface Liste<E> extends Iterable<E>
      * Restauration de cette liste. implementation optionnelle.
      *
      * @return true si la restauration a eu lieu, false sinon
-     * @throws UnsupportedOperationException si l'operation n'est pas implementee
      */
     public boolean restaurer();
 

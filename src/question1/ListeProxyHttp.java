@@ -1,6 +1,7 @@
 package question1;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import java.net.URL;
@@ -11,7 +12,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
-
+/**
+ * The type Liste proxy http.
+ */
 public class ListeProxyHttp implements Liste<String>
 {
     private final static String URL_CNAM = "http://jfod.cnam.fr/jnews/tests/tp_proxy.html";
@@ -20,6 +23,12 @@ public class ListeProxyHttp implements Liste<String>
     private String nom;
     private String url;
 
+    /**
+     * Instantiates a new Liste proxy http.
+     *
+     * @param url the url
+     * @param nom the nom
+     */
     public ListeProxyHttp(String url, String nom)
     {
         this.liste = new ListeImpl(nom);
@@ -27,11 +36,22 @@ public class ListeProxyHttp implements Liste<String>
         this.nom = nom;
     }
 
+    /**
+     * Instantiates a new Liste proxy http.
+     *
+     * @param nom the nom
+     */
     public ListeProxyHttp(String nom)
     {
         this(URL_CNAM, nom);
     }
 
+    /**
+     * Ajout d'un element a la liste.
+     *
+     * @param elt l'element a ajouter
+     * @return true si la liste a ete modifiee par cet ajout, false sinon, (notamment en cas d'exception)
+     */
     public boolean ajouter(String elt)
     {
         // a completer par une connexion HTTP avec les parametres suivants "nom=" + this.nom + "&commande=ajouter&elt="+ elt);
@@ -39,15 +59,21 @@ public class ListeProxyHttp implements Liste<String>
         Connexion connexion = new Connexion(this.url, parametres); // a completer , voir la classe interne Connexion en fin de listing
 
         Boolean resultatLocal = liste.ajouter(elt);
-        String resultatDistant = connexion.result(); // le résultat de la connexion
+        String resultatDistant = connexion.result(); // le resultat de la connexion
 
-        //si le resultatLocal est différent du  resultatDistant alors levée de CoherenceListeException("ajouter");
+        //si le resultatLocal est different du  resultatDistant alors levee de CoherenceListeException("ajouter");
         if (Boolean.parseBoolean(resultatDistant) != resultatLocal) {
             throw new CoherenceListeException("ajouter");
         }
         return resultatLocal;
     }
 
+    /**
+     * Retrait de toutes les occurrences de cet element de la liste
+     *
+     * @param elt l'element a retirer
+     * @return true si au moins un retrait a eu lieu, false sinon
+     */
     public boolean retirer(String elt)
     {
         // a completer par une connexion HTTP avec les parametres suivants "nom=" + this.nom + "&commande=retirer&elt="+ elt
@@ -55,7 +81,7 @@ public class ListeProxyHttp implements Liste<String>
         Connexion connexion = new Connexion(this.url, parametres);
 
         Boolean resultatLocal = liste.retirer(elt);
-        String resultatDistant = connexion.result(); // le résultat de la connexion
+        String resultatDistant = connexion.result(); // le resultat de la connexion
 
         if (Boolean.parseBoolean(resultatDistant) != resultatLocal) {
             throw new CoherenceListeException("retirer");
@@ -63,6 +89,11 @@ public class ListeProxyHttp implements Liste<String>
         return resultatLocal;
     }
 
+    /**
+     * Vider cette liste (ou le retrait de tous les elements).
+     *
+     * @return true si la liste a ete modifiee, false sinon
+     */
     public boolean vider()
     {
         // a completer par une connexion HTTP avec les parametres suivants "nom=" + this.nom + "&commande=vider"
@@ -70,7 +101,7 @@ public class ListeProxyHttp implements Liste<String>
         Connexion connexion = new Connexion(this.url, parametres);
 
         Boolean resultatLocal = liste.vider();
-        String resultatDistant = connexion.result(); // le résultat de la connexion
+        String resultatDistant = connexion.result(); // le resultat de la connexion
 
         if (Boolean.parseBoolean(resultatDistant) != resultatLocal) {
             throw new CoherenceListeException("vider");
@@ -79,31 +110,46 @@ public class ListeProxyHttp implements Liste<String>
     }
 
     /**
-     * restauration complete de la liste reeelle a partir de la derniere sauvegarde
+     * Restauration de cette liste.
+     *
+     * @return true si la restauration a eu lieu, false sinon
      */
     public boolean restaurer()
     {
         String parametres = "nom=" + this.nom + "&commande=restaurer";
-        Connexion connexion = new Connexion(this.url, parametres); // a completer
+        Connexion connexion = new Connexion(this.url, parametres);
+        connexion.result(); // execution à distance de la restauration
 
-        Boolean resultatLocal = liste.restaurer();
-        String resultatDistant = connexion.result(); // le résultat de la connexion
+        // on appelle la liste distante
+        parametres = "nom=" + this.nom + "&commande=toString";
+        connexion = new Connexion(this.url, parametres);
+        String resultatDistant = connexion.result(); // le resultat de la connexion
 
-        if (Boolean.parseBoolean(resultatDistant) != resultatLocal) {
-            throw new CoherenceListeException("restaurer");
+        // execution locale de la restauration
+        liste.restaurer();
+
+        // Si la liste distante restauree est differente de la liste locale restauree, on renvoie false
+        if (!resultatDistant.equals(liste.toString())) {
+            return false;
         }
 
-        return resultatLocal;
+        // sinon true
+        return true;
     }
 
-
+    /**
+     * Test de la presence d'un element.
+     *
+     * @param elt l'element a comparer
+     * @return true si elt est present, false autrement
+     */
     public boolean estPresent(String elt)
     {
         String parametres = "nom=" + this.nom + "&commande=estPresent&elt=" + elt;
-        Connexion connexion = new Connexion(this.url, parametres); // a completer
+        Connexion connexion = new Connexion(this.url, parametres);
 
         Boolean resultatLocal = liste.estPresent(elt);
-        String resultatDistant = connexion.result(); // le résultat de la connexion
+        String resultatDistant = connexion.result(); // le resultat de la connexion
 
         if (Boolean.parseBoolean(resultatDistant) != resultatLocal) {
             throw new CoherenceListeException("estPresent");
@@ -112,13 +158,18 @@ public class ListeProxyHttp implements Liste<String>
         return resultatLocal;
     }
 
+    /**
+     * Obtention du nombre d'elements.
+     *
+     * @return le nombre d'elements de la liste
+     */
     public int taille()
     {
         String parametres = "nom=" + this.nom + "&commande=taille";
-        Connexion connexion = new Connexion(this.url, parametres); // a completer
+        Connexion connexion = new Connexion(this.url, parametres);
 
         int resultatLocal = liste.taille();
-        String resultatDistant = connexion.result(); // le résultat de la connexion
+        String resultatDistant = connexion.result(); // le resultat de la connexion
 
         if (Integer.parseInt(resultatDistant) != resultatLocal) {
             throw new CoherenceListeException("taille");
@@ -127,13 +178,19 @@ public class ListeProxyHttp implements Liste<String>
         return resultatLocal;
     }
 
+    /**
+     * Obtention d'une liste sous ce format "[elt1, elt2, ...]",  format habituel des API predefinies.
+     * Une liste vide est notee [].
+     *
+     * @return la liste sous un format "lisible"
+     */
     public String toString()
     {
         String parametres = "nom=" + this.nom + "&commande=toString";
-        Connexion connexion = new Connexion(this.url, parametres); // a completer
+        Connexion connexion = new Connexion(this.url, parametres);
 
         String resultatLocal = liste.toString();
-        String resultatDistant = connexion.result(); // le résultat de la connexion
+        String resultatDistant = connexion.result(); // le resultat de la connexion
 
         if (!resultatDistant.equals(resultatLocal)) {
             throw new CoherenceListeException("toString");
@@ -142,7 +199,11 @@ public class ListeProxyHttp implements Liste<String>
         return resultatLocal;
     }
 
-
+    /**
+     * Parcours de la liste.
+     *
+     * @return un iterateur
+     */
     public Iterator<String> iterator()
     { // cette methode est complete
         return liste.iterator();
@@ -157,11 +218,22 @@ public class ListeProxyHttp implements Liste<String>
         private String parametres;
         private String result;
 
+        /**
+         * Instantiates a new Connexion.
+         *
+         * @param url the url
+         */
         public Connexion(String url)
         {
             this(url, null);
         }
 
+        /**
+         * Instantiates a new Connexion.
+         *
+         * @param url        the url
+         * @param parametres the parametres
+         */
         public Connexion(String url, String parametres)
         {
             this.url = url;
@@ -170,6 +242,11 @@ public class ListeProxyHttp implements Liste<String>
             this.start();
         }
 
+        /**
+         * Result string.
+         *
+         * @return the string
+         */
         public String result()
         {
             try {
@@ -207,7 +284,6 @@ public class ListeProxyHttp implements Liste<String>
         }
     }
 
-
     /**
      * Mise en place du proxy si necessaire
      * attention, aucune verification de la validite de l'URL transmise n'est effectuee
@@ -223,6 +299,5 @@ public class ListeProxyHttp implements Liste<String>
         prop.put("http.proxyHost", proxyHost);
         prop.put("http.proxyPort", Integer.toString(proxyPort));
     }
-
 }
 

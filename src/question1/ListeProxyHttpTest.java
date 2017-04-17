@@ -2,8 +2,14 @@ package question1;
 
 import java.util.Random;
 
+/**
+ * The type Liste proxy http test.
+ */
 public class ListeProxyHttpTest extends junit.framework.TestCase
 {
+    /**
+     * Test ajouter.
+     */
     public void testAjouter()
     {
         String nomDeLaListe = "L_" + new Random().nextInt(1000000);
@@ -16,9 +22,13 @@ public class ListeProxyHttpTest extends junit.framework.TestCase
         System.out.println(" verifiez maintenant depuis votre navigateur : http://jfod.cnam.fr/jnews/tests/tp_proxy.html?commande=toString&nom=" + nomDeLaListe);
     }
 
+    /**
+     * Test restaurer.
+     */
     public void testRestaurer()
     {
         String nomDeLaListe = "L_" + new Random().nextInt(1000000);
+
         Liste<String> l = new question1.ListeProxyHttp(nomDeLaListe);
         assertEquals(true, l.ajouter("I"));
         assertEquals(true, l.ajouter("II"));
@@ -29,11 +39,9 @@ public class ListeProxyHttpTest extends junit.framework.TestCase
         l = null; // perte de tous ses elements !
 
         l = new question1.ListeProxyHttp(nomDeLaListe);
-        l.vider();
-        System.out.println(nomDeLaListe + " videe : " + l);
+        l.restaurer();
+        System.out.println(nomDeLaListe + " restauree : " + l);
         assertEquals(true, l.ajouter("VI"));
         System.out.println(" depuis votre navigateur, cette liste : http://jfod.cnam.fr/jnews/tests/tp_proxy.html?commande=toString&nom=" + nomDeLaListe);
     }
-
-
 }
